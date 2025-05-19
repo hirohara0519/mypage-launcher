@@ -8,21 +8,25 @@ if (!apiUrl) {
   localStorage.setItem('sheetApi', apiUrl);
 }
 
-const companies = ["CyberAgent", "Mitsui", "Nomura"]; // スプレッドシートのcompany列と一致させる
 const grid = document.getElementById('grid');
 
-companies.forEach(company => {
-  fetch(`${apiUrl}?company=${encodeURIComponent(company)}`)
-    .then(res => res.json())
-    .then(data => {
+// 一覧取得APIにリクエスト（全データ返すようApps Script側も修正必要）
+fetch(`${apiUrl}?mode=all`)
+  .then(res => res.json())
+  .then(data => {
+    data.forEach(company => {
       const tile = document.createElement('div');
       tile.className = 'icon-tile';
-      tile.innerHTML = `<img class="icon-img" src="${data.logo}" alt="${data.company}">`;
+      tile.innerHTML = `<img class="icon-img" src="${company.logo}" alt="${company.company}">`;
       tile.onclick = () => {
-        window.open(data.url, '_blank');
-        alert(`【${data.company}】\nユーザー名: ${data.username}\nパスワード: ${data.password}`);
+        window.open(company.url, '_blank');
+        alert(`【${company.company}】\nユーザー名: ${company.username}\nパスワード: ${company.password}`);
       };
       grid.appendChild(tile);
-    })
-    .catch(err => console.error(`エラー: ${company}`, err));
-});
+    });
+  })
+  .catch(err => {
+    console.error("企業一覧の取得に失敗しました", err);
+    alert("企業データの取得に失敗しました。API URLやスプレッドシートをご確認ください。");
+  });
+
